@@ -47,6 +47,8 @@ export interface MatchRule {
     group?: string
 }
 
+interface FilterGroup {text: string, value: string}
+
 const __DEV__ = import.meta.env.DEV
 
 if (! process.env.VITE_LOCAL) {
@@ -137,13 +139,13 @@ function App() {
         [dark]
     )
 
-    const groupFilters = useMemo(() => {
+    const groupFilters = useMemo(()  => {
         let filters = new Set()
         rules.forEach(rule => {
             filters.add(rule.group)
         })
 
-        return Array.from(filters).map(filter => ({ text: filter, value: filter }))
+        return Array.from(filters).map(filter => ({ text: filter, value: filter } as FilterGroup))
     }, [rules])
 
     const reload = (clean = false) => {
