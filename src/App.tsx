@@ -356,9 +356,12 @@ function App() {
                             if (! value) {
                                 setAction('intercept')
                             }
+                            
+                            let _index = rules.findIndex(rule => rule.id == record.id)
+                            
                             setRules(data => {
                                 const result = [...data]
-                                result[index].enable = e.target.checked
+                                result[_index].enable = e.target.checked
                                 return result
                             })
                         }}></Checkbox>
