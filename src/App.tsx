@@ -4,7 +4,7 @@
  */
 import './App.less'
 import { Badge, Checkbox, BadgeProps, Button, Dropdown, Input, message, Modal, Spin, Table, Tag, Tooltip, Upload } from 'antd'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { TagOutlined, ControlOutlined, CodeOutlined, DeleteOutlined, PlusOutlined, SearchOutlined, DownOutlined, VerticalAlignBottomOutlined, UploadOutlined, SyncOutlined, RollbackOutlined, BugOutlined, FilterOutlined, MenuOutlined, UnorderedListOutlined, EllipsisOutlined } from '@ant-design/icons'
 import { ColumnsType } from 'antd/lib/table'
 import { pathMatch, randID, renderSize } from './utils'
@@ -23,6 +23,7 @@ import { loader } from "@monaco-editor/react";
 import { sendRequestLog } from './tools/sendRequest'
 import { ActionFieldKey, DarkFieldKey, FakedFieldKey, HiddenFieldsFieldKey, IndexFieldKey, RulesFieldKey, SelectedRowFieldKeys, UpdateMsgKey } from './tools/constants'
 import useTranslate from './hooks/useTranslate'
+import TagInput from './components/TagInput'
 
 export interface MatchRule {
     id: string
@@ -43,6 +44,7 @@ export interface MatchRule {
     responseHeaders?: Record<string, string>
     code?: string
     redirectUrl?: string
+    group?: string
 }
 
 const __DEV__ = import.meta.env.DEV
@@ -134,6 +136,15 @@ function App() {
         },
         [dark]
     )
+
+    const groupFilters = useMemo(() => {
+        let filters = new Set()
+        rules.forEach(rule => {
+            filters.add(rule.group)
+        })
+
+        return Array.from(filters).map(filter => ({ text: filter, value: filter }))
+    }, [rules])
 
     const reload = (clean = false) => {
         setLoading(true)
@@ -288,6 +299,26 @@ function App() {
                     render: (type) => type || 'xhr / fetch'
                 },
                 {
+                    dataIndex: 'group', type: 'group', width: 100, align: 'center',
+                    title: t('row_group'),
+                    filters: groupFilters,
+                    filterMode: 'tree',
+                    filterSearch: true,
+                    onFilter: (value: string, record) => record.group?.startsWith(value),
+                    render: (text, record) => {
+                        return <TagInput value={text} onChange={v => {
+                            const index = rules.findIndex(rule => rule.id === record.id)
+                            if (index != -1) {
+                                setRules(data => {
+                                    const result = [...data]
+                                    result[index].group = v
+                                    return result
+                                })
+                            }
+                        }} />
+                    }
+                },
+                {
                     dataIndex: 'count', key: 'count', width: 100, align: 'center',
                     title: t('row_size'),
                     sorter: {
@@ -430,6 +461,7 @@ function App() {
                                         id: randID(),
                                         count: 0,
                                         test: '/api-' + rule.length,
+                                        group: "default",
                                         response: {
                                             foo: 'xxx'
                                         },

@@ -50,6 +50,9 @@
     "row_type": {
         "message": "拦截类型"
     },
+    "row_group": {
+        "message": "分组"
+    },
     "row_size": {
         "message": "大小"
     },

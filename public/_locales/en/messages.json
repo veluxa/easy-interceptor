@@ -50,6 +50,9 @@
     "row_type": {
         "message": "Type"
     },
+    "row_group": {
+        "message": "Group"
+    },
     "row_size": {
         "message": "Size"
     },
